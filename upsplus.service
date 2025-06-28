@@ -1,0 +1,14 @@
+[Unit]
+Description=UPS battery monitoring script
+
+After=default.target
+
+[Service]
+WorkingDirectory=$HOME/bin/upsplus
+User=$USER
+ExecStart=$HOME/bin/upsplus/.venv/bin/python $HOME/bin/upsplus/upsplus.py
+
+[Install]
+WantedBy=default.target
+
+

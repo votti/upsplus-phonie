@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 # '''Enable Auto-Shutdown Protection Function '''
+
 import os
 import time
 import smbus2
@@ -15,10 +16,15 @@ DEVICE_BUS = 1
 DEVICE_ADDR = 0x17
 
 # Set the threshold of UPS automatic power-off to prevent damage caused by battery over-discharge, unit: mV.
-PROTECT_VOLT = 3500
+PROTECT_VOLT = 3700  
 
 # Set the sample period, Unit: min default: 2 min.
 SAMPLE_TIME = 2
+
+# Enable Back-to-AC fucntion.
+# Enable: write 1 to register 0x19 == 25
+# Disable: write 0 to register 0x19 == 25
+BACK_TO_AC = 0
 
 # Instance INA219 and getting information from it.
 ina_supply = INA219(0.00725, busnum=DEVICE_BUS, address=0x40)
@@ -59,7 +65,7 @@ except DeviceRangeError:
 bus = smbus2.SMBus(DEVICE_BUS)
 
 aReceiveBuf = []
-aReceiveBuf.append(0x00)
+aReceiveBuf.append(0x00) 
 
 # Read register and add the data to the list: aReceiveBuf
 for i in range(1, 255):
@@ -69,17 +75,12 @@ for i in range(1, 255):
 # Enable: write 1 to register 0x19 == 25
 # Disable: write 0 to register 0x19 == 25
 
-bus.write_byte_data(DEVICE_ADDR, 25, 1)
+bus.write_byte_data(DEVICE_ADDR, 25, BACK_TO_AC)
 
 # Reset Protect voltage
 bus.write_byte_data(DEVICE_ADDR, 17, PROTECT_VOLT & 0xFF)
 bus.write_byte_data(DEVICE_ADDR, 18, (PROTECT_VOLT >> 8)& 0xFF)
 print("Successfully set the protection voltage to: %d mV" % PROTECT_VOLT)
-
-UID0 = "%08X" % (aReceiveBuf[243] << 24 | aReceiveBuf[242] << 16 | aReceiveBuf[241] << 8 | aReceiveBuf[240])
-UID1 = "%08X" % (aReceiveBuf[247] << 24 | aReceiveBuf[246] << 16 | aReceiveBuf[245] << 8 | aReceiveBuf[244])
-UID2 = "%08X" % (aReceiveBuf[251] << 24 | aReceiveBuf[250] << 16 | aReceiveBuf[249] << 8 | aReceiveBuf[248])
-print('UID:' + UID0 + '/' + UID1 + '/' + UID2)
 
 if (aReceiveBuf[8] << 8 | aReceiveBuf[7]) > 4000:
     print('-'*60)
@@ -91,15 +92,11 @@ else:
     print('-'*60)
     print('Currently not charging.')
 # Consider shutting down to save data or send notifications
-    if (str(batt_voltage)) == ("0.0"):
-        print("Bad battery voltage value")
-    if (str(batt_voltage)) != ("0.0"):
-        if ((batt_voltage * 1000) < (PROTECT_VOLT + 200)):
-            print('-'*60)
-            print('The battery is going to dead! Ready to shut down!')
+    if ((batt_voltage * 1000) < (PROTECT_VOLT + 200)):
+        print('-'*60)
+        print('The battery is going to dead! Ready to shut down!')
 # It will cut off power when initialized shutdown sequence.
-            bus.write_byte_data(DEVICE_ADDR, 24,240)
-            os.system("sudo sync && sudo halt")
-            while True:
-                time.sleep(10)
-
+        bus.write_byte_data(DEVICE_ADDR, 24,240)
+        os.system("sudo sync && sudo halt")
+        while True:
+            time.sleep(10)
