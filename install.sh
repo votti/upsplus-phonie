@@ -90,6 +90,7 @@ log_action_msg "Add service for batteryups list."
 # Thus set the current username as user
 
 envsubst < upsplus.service | sudo tee /etc/systemd/system/upsplus.service
+sudo cp upsplus.timer /etc/systemd/system/
 
 sudo systemctl start upsplus.service
 systemctl status upsplus.service
