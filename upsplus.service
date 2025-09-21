@@ -10,6 +10,3 @@ ExecStart=$HOME/bin/upsplus/.venv/bin/python $HOME/bin/upsplus/upsplus.py
 
 [Install]
 WantedBy=default.target
-
-[Timer]
-OnUnitActiveSec=2min

@@ -1,0 +1,8 @@
+[Unit]
+Description=run upsplus
+
+[Timer]
+OnUnitActiveSec=2min
+
+[Install]
+WantedBy=timers.target

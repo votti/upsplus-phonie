@@ -92,5 +92,7 @@ log_action_msg "Add service for batteryups list."
 envsubst < upsplus.service | sudo tee /etc/systemd/system/upsplus.service
 sudo cp upsplus.timer /etc/systemd/system/
 
+sudo systemctl daemon-reload
+sudo systemctl enable --now upsplus.timer
 sudo systemctl start upsplus.service
 systemctl status upsplus.service
